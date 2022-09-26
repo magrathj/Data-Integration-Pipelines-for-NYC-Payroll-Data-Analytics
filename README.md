@@ -276,3 +276,6 @@ Choose the parameter created at the Pipeline level
 ### 10.Validate, Publish and Trigger the pipeline. Enter the desired value for the parameter.
 
 ### 11.Monitor the Pipeline run and take a screenshot of the finished pipeline run.
+
+## References
+[Terraform_ADF](https://github.com/gersta/az-data-factory-terraform-demo)
