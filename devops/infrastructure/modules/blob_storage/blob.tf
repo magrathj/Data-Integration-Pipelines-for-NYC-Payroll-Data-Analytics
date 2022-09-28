@@ -1,15 +1,24 @@
 resource "azurerm_storage_account" "adlsnycpayroll" {
     name = "adlsnycpayroll${var.user_name}${var.user_second_initial}"
-    resource_group_name = var.resource_group_name
-    location = var.location
-    account_tier = "Standard"
+    resource_group_name      = var.resource_group_name
+    location                 = var.location
+    account_tier             = "Standard"
     account_replication_type = "LRS"
+    account_kind             = "StorageV2"
+    is_hns_enabled           = "true"
 
     tags = {
         creator = "Terraform"
         project = "Data Integration Pipelines for NYC Payroll Data Analytics"
     }
 }
+
+resource "azurerm_storage_data_lake_gen2_filesystem" "adlsnycpayroll" {
+  name               = "adlsnycpayrollstoragedatalake"
+  storage_account_id = azurerm_storage_account.adlsnycpayroll.id
+}
+
+
 
 # # create containers 
 resource "azurerm_storage_container" "dirpayrollfiles" {

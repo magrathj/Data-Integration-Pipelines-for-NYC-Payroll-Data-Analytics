@@ -76,3 +76,48 @@ module "sql_database" {
   username = azurerm_key_vault_secret.sql_username.value
   password = azurerm_key_vault_secret.sql_password.value
 }
+
+resource "azurerm_key_vault_secret" "synapse_username" {
+  name         = "synapse-sql-administrator-login"
+  key_vault_id = azurerm_key_vault.terraform_backend_vault.id
+  value        = var.synapse_sql_administrator_login
+}
+
+resource "azurerm_key_vault_secret" "synapse_password" {
+  name         = "synapse-sql-administrator-password"
+  key_vault_id = azurerm_key_vault.terraform_backend_vault.id
+  value        = var.synapse_sql_administrator_password
+}
+
+module "synapse" {
+  source = "./modules/synapse"
+
+  resource_group_name                  = azurerm_resource_group.main.name
+  location                             = azurerm_resource_group.main.location
+  synapse_workspace_name               = var.synapse_workspace_name
+  storage_data_lake_gen2_filesystem_id = module.blob_storage.adlsid
+  synapse_sql_administrator_login      = azurerm_key_vault_secret.synapse_username.value
+  synapse_sql_administrator_password   = azurerm_key_vault_secret.synapse_password.value
+  synapse_sql_pool_name                = var.synapse_sql_pool_name
+}
+
+
+locals {
+  sql_connection_string = "Server=tcp:${module.sql_database.server_name}.database.windows.net,1433;Initial Catalog=${module.sql_database.database_name};Persist Security Info=False;User ID=${azurerm_key_vault_secret.sql_username.value};Password=${azurerm_key_vault_secret.sql_password.value};MultipleActiveResultSets=True;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+}
+
+locals {
+  primary_connection_string_synapse = "Integrated Security=False;Data Source=${var.synapse_workspace_name}synapse;Initial Catalog=${var.synapse_sql_pool_name}synapse;User ID=${azurerm_key_vault_secret.synapse_username.value};Password=${azurerm_key_vault_secret.synapse_password.value}"
+}
+
+module "adf" {
+  source = "./modules/adf"
+
+  resource_group_name                  = azurerm_resource_group.main.name
+  location                             = azurerm_resource_group.main.location
+  adf_name                             = var.adf_name
+  primary_connection_string_blob       = module.blob_storage.connection_string
+  primary_connection_string_sql        = local.sql_connection_string
+  primary_connection_string_synapse    = local.primary_connection_string_synapse
+}
+

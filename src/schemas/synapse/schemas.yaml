@@ -1,0 +1,42 @@
+- name: riders
+  size: small
+  columns: ['rider_id', 'first', 'last', 'address', 'birthday', 'account_start_date', 'account_end_date', 'is_member']
+  schema: |
+    rider_id INTEGER PRIMARY KEY, 
+    first VARCHAR(50), 
+    last VARCHAR(50), 
+    address VARCHAR(100), 
+    birthday DATE, 
+    account_start_date DATE, 
+    account_end_date DATE, 
+    is_member BOOLEAN
+
+- name: payments
+  size: small
+  columns: ['payment_id', 'date', 'amount', 'rider_id']
+  schema: |
+    payment_id INTEGER PRIMARY KEY, 
+    date DATE, 
+    amount MONEY, 
+    rider_id INTEGER
+
+- name: trips
+  size: medium
+  columns: ['trip_id', 'rideable_type', 'start_at', 'ended_at', 'start_station_id', 'end_station_id', 'rider_id']
+  schema: |
+    trip_id VARCHAR(50) PRIMARY KEY, 
+    rideable_type VARCHAR(75), 
+    start_at VARCHAR(50), 
+    ended_at VARCHAR(50), 
+    start_station_id VARCHAR(50), 
+    end_station_id VARCHAR(50), 
+    rider_id INTEGER
+
+- name: stations
+  size: small
+  columns: ['station_id', 'name', 'longitude', 'latitude']
+  schema: |
+    station_id VARCHAR(50) PRIMARY KEY, 
+    name VARCHAR(75), 
+    latitude FLOAT, 
+    longitude FLOAT
